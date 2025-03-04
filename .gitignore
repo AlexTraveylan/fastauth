@@ -1,0 +1,128 @@
+# IDEs and Editors, assume vscode or cursor are used
+.idea/
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+.fleet/
+
+# Python Bytecode and Caches
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+
+# Virtual Environments
+.env
+.venv
+venv/
+ENV/
+env.bak/
+venv.bak/
+.virtualenv
+.conda
+
+# Build and Distribution
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Testing and Coverage
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+htmlcov/
+.hypothesis/
+.nox/
+.mypy_cache/
+.ruff_cache/
+
+# Logs
+*.log
+local_logs/
+logs/
+
+# Environment and Secret Files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+secrets.json
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Jupyter and Interactive Environments
+.ipynb_checkpoints
+*.ipynb
+
+# Packages and Dependencies
+*.egg
+*.whl
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Project-Specific Ignores
+*.sqlite3
+*.db
+
+# Misc Developer Tools
+.pylintrc
+.flake8
+.isort.cfg
+
+# Poetry
+poetry.lock
+
+# Pytest
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Static Type Checking
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# Debug and Profiling
+.prof
+*.pstat
+
+# Configuration backups
+*.bak
+*.gho
+*.ori
+*.orig
+*.tmp
+
+# Machine Learning / Data Science specific
+*.pkl
+*.joblib
+*.model

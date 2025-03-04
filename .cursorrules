@@ -1,0 +1,116 @@
+# FastAuth project cursor rules
+
+You are an elite software developer with extensive expertise in Python, FastAPI, SQLModel, alembic, postgres and docker.
+
+# Context
+
+python_version = "3.13"
+
+technologies = [
+    "pydantic",
+    "fastapi",
+    "sqlmodel",
+    "alembic",
+    "postgres",
+    "docker",
+    "pytest"
+]
+
+dependency_manager = "uv"
+
+# Description
+
+description = """
+fastauth is a api's microservice for authentification with asyncronous postgres database.
+all in one docker-compose file.
+It got a /register, /login, /logout, /refresh, /me endpoints.
+Working with jwt tokens.
+You can also connect with google oauth.
+"""
+
+# Folder structure
+
+fastauth/
+├── fastauth/
+│   ├── main.py
+│   ├── models/
+│   └── schemas/
+│   └── routers/
+│   └── services/
+├── alembic/
+│   ├── env.py
+│   ├── README
+│   └── versions/
+├── tests/
+│   ├── conftest.py
+│   ├── factories/
+│   ├── unit/
+│   └── integration/
+├── .env
+├── .gitignore
+├── .cursorrules
+├── .pyproject.toml
+├── Dockerfile
+├── docker-compose.yml
+├── README.md
+
+
+# FastAPI best practices
+
+fastapi_best_practices = [
+    "Use Pydantic models for request and response schemas",
+    "Implement dependency injection for shared resources",
+    "Utilize async/await for non-blocking operations",
+    "Use path operations decorators (@app.get, @app.post, etc.)",
+    "Implement proper error handling with HTTPException",
+    "Use FastAPI's built-in OpenAPI and JSON Schema support",
+]
+
+# Best practices and rules
+
+best_practices = [
+    "Use Meaningful Names",
+    "Follow PEP 8",
+    "Use Docstrings",
+    "Keep It Simple",
+    "Use List Comprehensions",
+    "Use Virtual Environments",
+    "Write Tests",
+    "Use Type Hints",
+    "Avoid Global Variables",
+]
+
+# Additional instructions
+
+additional_instructions = """
+1. Use type hints for all function parameters and return values
+2. Implement proper input validation using Pydantic
+3. Use FastAPI's background tasks for long-running operations
+4. Implement proper CORS handling
+5. Use FastAPI's security utilities for authentication
+6. Follow PEP 8 style guide for Python code
+7. Implement comprehensive unit and integration tests
+"""
+
+# Tests
+
+framework = "pytest"
+
+tests_instructions = """
+1. Use pytest for testing
+2. Use pytest-asyncio for testing async functions
+3. Use factoryboy and faker for fixtures
+4. Use in-memory database for testing
+5. Use the syntaxe:
+    def test_function_name(db_session: Session, ...):
+        # Given
+        ...
+
+        # When
+        ...
+        
+        # Then
+        assert ...
+6. Use dependency injection with appropriate scope
+7. Stay focus on fonctionnal tests, do not mock everything, tests must show the api's behavior
+"""
