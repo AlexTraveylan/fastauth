@@ -76,7 +76,10 @@ jobs:
           source .venv/bin/activate
           python scripts/bump_version.py $VERSION_TYPE
 
+          # Read the new version
+          NEW_VERSION=$(grep "version =" pyproject.toml | cut -d '"' -f 2)
+
           # Commit and push version change
           git add .  # Add all changed files
-          git commit -m "[BOT] Version bump to: $(python -c "import importlib.metadata; print(importlib.metadata.version('your_package_name'))")"
+          git commit -m "[BOT] Version bump to: $NEW_VERSION"
           git push origin HEAD:$GITHUB_REF
