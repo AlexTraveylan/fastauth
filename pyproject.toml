@@ -1,6 +1,6 @@
 [project]
 name = "fastauth"
-version = "0.1.4"
+version = "0.1.5"
 description = "Fastauth is a api's microservice for authentification with asyncronous postgres database. All in one docker-compose file. It got a /register, /login, /logout, /refresh, /me endpoints. Working with jwt tokens. You can also connect with google oauth."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -14,12 +14,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = [
-    "mypy>=1.15.0",
-    "pytest>=8.3.5",
-    "ruff>=0.9.9",
-    "typer>=0.15.2",
-]
+dev = ["mypy>=1.15.0", "pytest>=8.3.5", "ruff>=0.9.9", "typer>=0.15.2"]
 
 # ===============
 # pytest
