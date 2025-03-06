@@ -29,13 +29,13 @@ jobs:
         run: uv sync
 
       - name: Run Ruff linter
-        run: uv tool run ruff check .
+        run: uv run ruff check .
 
       - name: Run Mypy type checking
-        run: uv tool run mypy .
+        run: uv run mypy .
 
       - name: Run Pytest
-        run: uv tool run pytest
+        run: uv run pytest
 
   bump-version:
     needs: quality
