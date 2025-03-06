@@ -1,116 +1,63 @@
-# FastAuth project cursor rules
+# FastAuth - Microservice d'Authentification
 
-You are an elite software developer with extensive expertise in Python, FastAPI, SQLModel, alembic, postgres and docker.
+## À propos du projet
+- Description: Microservice API d'authentification avec base de données PostgreSQL asynchrone
+- Fonctionnalités: /register, /login, /logout, /refresh, /me, authentification OAuth Google
+- Python: 3.13
+- Gestionnaire de dépendances: uv
 
-# Context
+## Stack technique
+- FastAPI, Pydantic
+- SQLModel, Alembic
+- PostgreSQL
+- Docker
+- Pytest
 
-python_version = "3.13"
-
-technologies = [
-    "pydantic",
-    "fastapi",
-    "sqlmodel",
-    "alembic",
-    "postgres",
-    "docker",
-    "pytest"
-]
-
-dependency_manager = "uv"
-
-# Description
-
-description = """
-fastauth is a api's microservice for authentification with asyncronous postgres database.
-all in one docker-compose file.
-It got a /register, /login, /logout, /refresh, /me endpoints.
-Working with jwt tokens.
-You can also connect with google oauth.
-"""
-
-# Folder structure
-
+## Structure du projet
 fastauth/
 ├── fastauth/
-│   ├── main.py
-│   ├── models/
-│   └── schemas/
-│   └── routers/
-│   └── services/
-├── alembic/
-│   ├── env.py
-│   ├── README
-│   └── versions/
-├── tests/
+│   ├── main.py          # Point d'entrée de l'application
+│   ├── models/          # Modèles de données SQLModel
+│   ├── schemas/         # Schémas Pydantic de requête/réponse
+│   ├── routers/         # Définition des routes API
+│   └── services/        # Logique métier
+├── alembic/             # Migrations de base de données
+├── tests/               # Tests automatisés
 │   ├── conftest.py
 │   ├── factories/
 │   ├── unit/
 │   └── integration/
-├── .env
-├── .gitignore
-├── .cursorrules
-├── .pyproject.toml
-├── Dockerfile
-├── docker-compose.yml
-├── README.md
+├── .env                 # Variables d'environnement
+├── Dockerfile           # Configuration de l'image Docker
+├── docker-compose.yml   # Configuration multi-conteneurs
+└── pyproject.toml       # Configuration du projet
 
 
-# FastAPI best practices
+## Bonnes pratiques
+1. Structure du code
+- Utiliser des noms explicites pour les variables et fonctions
+- Suivre PEP 8 pour le style de code
+- Documenter avec des docstrings
+- Utiliser des annotations de type partout
 
-fastapi_best_practices = [
-    "Use Pydantic models for request and response schemas",
-    "Implement dependency injection for shared resources",
-    "Utilize async/await for non-blocking operations",
-    "Use path operations decorators (@app.get, @app.post, etc.)",
-    "Implement proper error handling with HTTPException",
-    "Use FastAPI's built-in OpenAPI and JSON Schema support",
-]
+2. FastAPI
+- Valider les entrées avec Pydantic
+- Implémenter l'injection de dépendances
+- Utiliser async/await pour les opérations non-bloquantes
+- Gérer les erreurs avec HTTPException
+- Configurer CORS correctement
+- Utiliser les utilitaires de sécurité intégrés
 
-# Best practices and rules
+3. Tests
+- Utiliser pytest et pytest-asyncio
+- Structurer les tests en "Given-When-Then"
+- Créer des fixtures avec factoryboy et faker
+- Privilégier les tests fonctionnels représentatifs du comportement de l'API
+- Utiliser une base de données en mémoire
 
-best_practices = [
-    "Use Meaningful Names",
-    "Follow PEP 8",
-    "Use Docstrings",
-    "Keep It Simple",
-    "Use List Comprehensions",
-    "Use Virtual Environments",
-    "Write Tests",
-    "Use Type Hints",
-    "Avoid Global Variables",
-]
-
-# Additional instructions
-
-additional_instructions = """
-1. Use type hints for all function parameters and return values
-2. Implement proper input validation using Pydantic
-3. Use FastAPI's background tasks for long-running operations
-4. Implement proper CORS handling
-5. Use FastAPI's security utilities for authentication
-6. Follow PEP 8 style guide for Python code
-7. Implement comprehensive unit and integration tests
-"""
-
-# Tests
-
-framework = "pytest"
-
-tests_instructions = """
-1. Use pytest for testing
-2. Use pytest-asyncio for testing async functions
-3. Use factoryboy and faker for fixtures
-4. Use in-memory database for testing
-5. Use the syntaxe:
-    def test_function_name(db_session: Session, ...):
-        # Given
-        ...
-
-        # When
-        ...
-        
-        # Then
-        assert ...
-6. Use dependency injection with appropriate scope
-7. Stay focus on fonctionnal tests, do not mock everything, tests must show the api's behavior
-"""
+## Architecture
+- API RESTful avec endpoints d'authentification
+- Authentification par JWT
+- Connexion OAuth Google
+- Base de données PostgreSQL asynchrone
+- Conteneurisation complète avec Docker Compose

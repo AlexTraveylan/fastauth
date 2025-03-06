@@ -4,7 +4,9 @@ version = "0.1.2"
 description = "Fastauth is a api's microservice for authentification with asyncronous postgres database. All in one docker-compose file. It got a /register, /login, /logout, /refresh, /me endpoints. Working with jwt tokens. You can also connect with google oauth."
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "fastapi[standard]>=0.115.11",
+]
 
 # ===============
 # pytest

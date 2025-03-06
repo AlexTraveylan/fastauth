@@ -1,7 +1,9 @@
-def main():
-    """Run the FastAuth application."""
-    print("Hello from fastauth!")
+from fastapi import FastAPI
+
+app = FastAPI()
 
 
-if __name__ == "__main__":
-    main()
+@app.get("/")
+def read_root():
+    """Test endpoint to check if the server is running."""
+    return {"message": "Server is running"}

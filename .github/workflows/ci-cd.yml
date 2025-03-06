@@ -75,6 +75,7 @@ jobs:
           # Run version bump script
           source .venv/bin/activate
           python scripts/bump_version.py $VERSION_TYPE
+          uv sync
 
           # Read the new version
           NEW_VERSION=$(grep "version =" pyproject.toml | cut -d '"' -f 2)
