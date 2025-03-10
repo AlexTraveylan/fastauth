@@ -1,9 +1,9 @@
 from datetime import UTC, datetime
 from enum import Enum
-from typing import Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
+from fastauth.db.repository import Repository
 from fastauth.models.user import User
 
 
@@ -23,7 +23,7 @@ class Token(SQLModel, table=True):
 
     __tablename__ = "tokens"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     token: str = Field(index=True)
     token_type: TokenType
     expires_at: datetime
@@ -33,3 +33,9 @@ class Token(SQLModel, table=True):
     # Relation with the user
     user_id: int = Field(foreign_key="users.id")
     user: User = Relationship(back_populates="tokens")
+
+
+class TokenRepository(Repository[Token]):
+    """Repository for token model."""
+
+    __model__ = Token
