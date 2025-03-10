@@ -23,7 +23,6 @@ fastauth/
 ├── fastauth/
 │   ├── main.py          # Point d'entrée de l'application
 │   ├── models/          # Modèles de données SQLModel
-│   ├── schemas/         # Schémas Pydantic de requête/réponse
 │   ├── routers/         # Définition des routes API
 │   └── services/        # Logique métier
 ├── alembic/             # Migrations de base de données
