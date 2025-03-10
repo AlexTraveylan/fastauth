@@ -1,6 +1,6 @@
 [project]
 name = "fastauth"
-version = "0.3.0"
+version = "0.3.1"
 description = "Fastauth is a api's microservice for authentification with asyncronous postgres database. All in one docker-compose file. It got a /register, /login, /logout, /refresh, /me endpoints. Working with jwt tokens. You can also connect with google oauth."
 readme = "README.md"
 requires-python = ">=3.13"
