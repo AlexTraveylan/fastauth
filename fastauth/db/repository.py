@@ -77,14 +77,13 @@ class TokenRepository(Repository[Token]):
 
     __model__ = Token
 
-    # async def is_valid(self, session: AsyncSession, token: str, username: str) -> bool:
-    #     """Check if the token is valid."""
-    #     token_query = (
-    #         select(Token)
-    #         .where(Token.token == token, Token.revoked is False)
-    #         .join(User)
-    #         .where(User.username == username)
-    #     )
-    #     token_db = (await session.exec(token_query)).first()
+    async def is_valid(self, session: AsyncSession, token: str, user_id: int) -> bool:
+        """Check if the token is valid."""
+        token_query = select(Token).where(
+            Token.token == token,
+            Token.revoked is False,
+            Token.user_id is user_id,
+        )
+        token_db = (await session.execute(token_query)).scalars().first()
 
-    #     return token_db is not None
+        return token_db is not None

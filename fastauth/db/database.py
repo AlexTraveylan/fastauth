@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlmodel import SQLModel
 
+from fastauth.common.exceptions import DatabaseException
 from fastauth.common.settings import settings
 
 
@@ -38,6 +39,6 @@ async def get_async_session(
             await session.commit()
         except Exception as e:
             await session.rollback()
-            raise e
+            raise DatabaseException("An error occurred during the session") from e
         finally:
             await session.close()
