@@ -1,12 +1,8 @@
+from __future__ import annotations
+
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
 
-from sqlmodel import Field, Relationship, SQLModel
-
-from fastauth.db.repository import Repository
-
-if TYPE_CHECKING:
-    from fastauth.models.token import Token
+from sqlmodel import Column, DateTime, Field, SQLModel
 
 
 class User(SQLModel, table=True):
@@ -23,18 +19,15 @@ class User(SQLModel, table=True):
     username: str = Field(unique=True, index=True)
     hashed_password: str
     is_superuser: bool = Field(default=False)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        sa_column=Column(DateTime(timezone=True)),
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        sa_column=Column(DateTime(timezone=True)),
+    )
 
     # OAuth fields (optional)
     oauth_provider: str | None = None
     oauth_id: str | None = None
-
-    # Relation with the tokens
-    tokens: list["Token"] = Relationship(back_populates="user")
-
-
-class UserRepository(Repository[User]):
-    """Repository for user model."""
-
-    __model__ = User
