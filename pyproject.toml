@@ -19,6 +19,7 @@ dependencies = [
 dev = [
     "factory-boy>=3.3.3",
     "mypy>=1.15.0",
+    "pytest-asyncio>=0.25.3",
     "pytest>=8.3.5",
     "ruff>=0.9.9",
     "typer>=0.15.2",

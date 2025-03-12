@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # Database parameters
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/fastauth"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:fastauth@localhost:5432/fastauth"
 
     # JWT parameters
     JWT_SECRET_KEY: str = os.getenv(
