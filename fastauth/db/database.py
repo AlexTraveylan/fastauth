@@ -9,7 +9,7 @@ from fastauth.common.exceptions import DatabaseException
 from fastauth.common.settings import settings
 
 
-def _get_async_engine() -> AsyncEngine:
+def get_async_engine() -> AsyncEngine:
     """Get the async engine for the database."""
     return create_async_engine(
         settings.DATABASE_URL,
@@ -18,14 +18,14 @@ def _get_async_engine() -> AsyncEngine:
     )
 
 
-async def init_db(engine: Annotated[AsyncEngine, Depends(_get_async_engine)]) -> None:
+async def init_db(engine: Annotated[AsyncEngine, Depends(get_async_engine)]) -> None:
     """Initialize the database with the defined models."""
     async with engine.begin() as async_conn:
         await async_conn.run_sync(SQLModel.metadata.create_all)
 
 
 async def get_async_session(
-    engine: Annotated[AsyncEngine, Depends(_get_async_engine)],
+    engine: Annotated[AsyncEngine, Depends(get_async_engine)],
 ) -> AsyncGenerator[AsyncSession, None]:
     """Yield an async session."""
     async_session = async_sessionmaker(

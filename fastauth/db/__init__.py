@@ -1,4 +1,4 @@
-from fastauth.db.database import get_async_session, init_db
+from fastauth.db.database import get_async_engine, get_async_session, init_db
 from fastauth.db.repository import TokenRepository, UserRepository
 
 __all__ = [
@@ -6,4 +6,5 @@ __all__ = [
     "UserRepository",
     "get_async_session",
     "init_db",
+    "get_async_engine",
 ]
