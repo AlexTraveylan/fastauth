@@ -96,18 +96,18 @@ class AuthService:
 
     async def create_token_for_user(
         self,
-        user: User,
         session: AsyncSession,
+        user: User,
     ) -> tuple[str, str]:
         """Create a new JWT token for the given user."""
         access_token_expires = timedelta(
             minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
         )
-        access_token_data = {"sub": user.id, "type": "access"}
+        access_token_data = {"sub": str(user.id), "type": "access"}
         access_token = self._create_token(access_token_data, access_token_expires)
 
         refresh_token_expires = timedelta(days=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS)
-        refresh_token_data = {"sub": user.id, "type": "refresh"}
+        refresh_token_data = {"sub": str(user.id), "type": "refresh"}
         refresh_token = self._create_token(refresh_token_data, refresh_token_expires)
 
         access_token_db = Token(
@@ -129,7 +129,7 @@ class AuthService:
 
         return access_token, refresh_token
 
-    async def get_current_user(
+    async def get_user_from_token(
         self,
         session: AsyncSession,
         token: str,
@@ -137,21 +137,24 @@ class AuthService:
         """Get the current user from the token."""
         try:
             payload = jwt.decode(
-                token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+                token,
+                settings.JWT_SECRET_KEY,
+                algorithms=[settings.JWT_ALGORITHM],
             )
+
             user_id: int = int(payload.get("sub"))
             token_type: str = payload.get("type")
 
             if user_id is None or token_type != "access":
                 raise self.credentials_exception
 
-            is_token_valid = await self.token_repository.is_valid(
+            token_db = await self.token_repository.get_or_none(
                 session=session,
                 token=token,
                 user_id=user_id,
             )
 
-            if is_token_valid is False:
+            if token_db is None or token_db.expires_at < datetime.now(UTC):
                 raise self.credentials_exception
 
             user = await self.user_repository.get_or_none(session=session, id=user_id)
