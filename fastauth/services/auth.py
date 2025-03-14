@@ -1,3 +1,4 @@
+import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any, cast
 
@@ -154,7 +155,7 @@ class AuthService:
                 user_id=user_id,
             )
 
-            if token_db is None or token_db.expires_at < datetime.now(UTC):
+            if token_db is None or token_db.is_expired is True:
                 raise self.credentials_exception
 
             user = await self.user_repository.get_or_none(session=session, id=user_id)
@@ -166,3 +167,46 @@ class AuthService:
 
         except JWTError:
             raise self.credentials_exception
+
+    async def create_or_update_oauth2_user(
+        self,
+        session: AsyncSession,
+        provider: str,
+        provider_id: str,
+        email: str,
+        username: str,
+    ) -> User:
+        """Create or update an authenticated user via OAuth."""
+        user = await self.user_repository.get_or_none(
+            session=session,
+            oauth_provider=provider,
+            oauth_id=provider_id,
+        )
+
+        if user is None:
+            user = await self.user_repository.get_or_none(
+                session=session,
+                email=email,
+            )
+
+        if user is not None and user.id is not None:
+            await self.user_repository.update(
+                session=session,
+                id_=user.id,
+                oauth_provider=provider,
+                oauth_id=provider_id,
+            )
+            return user
+
+        random_password = uuid.uuid4().hex
+        hashed_password = self._get_password_hash(random_password)
+
+        user = User(
+            email=email,
+            username=username,
+            hashed_password=hashed_password,
+            oauth_provider=provider,
+            oauth_id=provider_id,
+        )
+
+        return await self.user_repository.create(session=session, item=user)

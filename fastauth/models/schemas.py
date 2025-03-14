@@ -41,3 +41,13 @@ class MessageResponse(BaseModel):
     """Schema for simple message responses."""
 
     message: str
+
+
+class GoogleUserInfo(BaseModel):
+    """Schema for Google user info."""
+
+    email: EmailStr
+    email_verified: bool
+    name: str
+    family_name: str
+    sub: str

@@ -2,10 +2,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
 from fastauth.common.settings import settings
 from fastauth.db import get_async_engine, init_db
 from fastauth.routers.auth import router as auth_router
+from fastauth.routers.google_auth import router as google_auth_router
 
 
 @asynccontextmanager
@@ -17,6 +19,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
 
+# Necessary for OAuth2
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.JWT_SECRET_KEY,
+)
 
 # Configure CORS
 app.add_middleware(
@@ -29,6 +36,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth_router, prefix=f"{settings.API_PREFIX}/auth")
+app.include_router(google_auth_router, prefix=f"{settings.API_PREFIX}/auth/google")
 
 
 @app.get("/")

@@ -45,7 +45,7 @@ async def register(
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[AsyncSession, Depends(get_async_session)],
-) -> dict:
+) -> Token:
     """Authenticate and login a user."""
     user_login = UserLogin(
         username=form_data.username,
@@ -57,11 +57,12 @@ async def login(
         session=session,
         user=user,
     )
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-    }
+
+    return Token(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+    )
 
 
 @router.get("/me", response_model=UserResponse)

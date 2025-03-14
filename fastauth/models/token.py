@@ -32,3 +32,8 @@ class Token(SQLModel, table=True):
 
     # Relation with the user
     user_id: int = Field(foreign_key="users.id", ondelete="CASCADE")
+
+    @property
+    def is_expired(self) -> bool:
+        """Check if the token is expired."""
+        return self.expires_at.astimezone(UTC) > datetime.now(UTC)
