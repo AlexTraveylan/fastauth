@@ -6,8 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from fastauth.common.settings import settings
 from fastauth.db import get_async_engine, init_db
-from fastauth.routers.auth import router as auth_router
-from fastauth.routers.google_auth import router as google_auth_router
+from fastauth.routers import auth_router, google_auth_router
 
 
 @asynccontextmanager
