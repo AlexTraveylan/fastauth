@@ -29,7 +29,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY . .
 
 # Install dependencies using uv from pyproject.toml
-RUN uv sync --frozen --no-cache
+RUN uv sync --no-dev --frozen --no-cache
 
 # Switch to the non-privileged user to run the application.
 USER appuser
