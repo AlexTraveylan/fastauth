@@ -29,10 +29,8 @@ class Token(BaseModel):
 class UserResponse(BaseModel):
     """Schema for user data in responses."""
 
-    id: int
     email: str
     username: str
-    is_superuser: bool
     created_at: datetime
     updated_at: datetime
 
