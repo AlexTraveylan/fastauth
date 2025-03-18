@@ -36,4 +36,4 @@ class Token(SQLModel, table=True):
     @property
     def is_expired(self) -> bool:
         """Check if the token is expired."""
-        return self.expires_at.astimezone(UTC) > datetime.now(UTC)
+        return self.expires_at.astimezone(UTC) < datetime.now(UTC)

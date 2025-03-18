@@ -1,6 +1,5 @@
 """Configuration de l'application FastAuth."""
 
-import os
 from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -26,9 +25,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://postgres:fastauth@localhost:5432/fastauth"
 
     # JWT parameters
-    JWT_SECRET_KEY: str = os.getenv(
-        "JWT_SECRET_KEY", "super-secret-key-change-in-production"
-    )
+    JWT_SECRET_KEY: str = "super-secret-key-change-in-production"
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
