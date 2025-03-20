@@ -1,8 +1,9 @@
 from collections.abc import Sequence
+from datetime import UTC, datetime
 
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from sqlmodel import select
+from sqlmodel import delete, select
 
 from fastauth.models import Token, User
 
@@ -76,3 +77,8 @@ class TokenRepository(Repository[Token]):
     """Repository for token model."""
 
     __model__ = Token
+
+    async def delete_expired(self, session: AsyncSession) -> None:
+        """Delete expired tokens."""
+        statement = delete(Token).where(Token.expires_at < datetime.now(UTC))  # type: ignore
+        await session.execute(statement)

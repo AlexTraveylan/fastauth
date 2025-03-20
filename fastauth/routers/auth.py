@@ -71,3 +71,29 @@ async def get_current_user_info(
 ) -> User:
     """Get information about the currently authenticated user."""
     return current_user
+
+
+@router.get("/refresh", response_model=Token)
+async def refresh(
+    refresh_token: Annotated[str, Depends(oauth2_scheme)],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> Token:
+    """Refresh a token."""
+    access_token = await auth_service.refresh_token(
+        session=session,
+        refresh_token=refresh_token,
+    )
+
+    return Token(
+        access_token=access_token.token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+    )
+
+
+@router.get("/clean")
+async def clean(
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> None:
+    """Clean expired tokens."""
+    await auth_service.clean_expired_tokens(session=session)

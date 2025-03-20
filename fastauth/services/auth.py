@@ -27,6 +27,10 @@ class AuthService:
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    refresh_token_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not refresh token",
+    )
 
     def __init__(
         self,
@@ -210,3 +214,48 @@ class AuthService:
         )
 
         return await self.user_repository.create(session=session, item=user)
+
+    async def refresh_token(
+        self,
+        session: AsyncSession,
+        refresh_token: str,
+    ) -> Token:
+        """Refresh a token."""
+        refresh_token_db = await self.token_repository.get_or_none(
+            session=session,
+            token=refresh_token,
+            token_type=TokenType.REFRESH,
+        )
+
+        if refresh_token_db is None or refresh_token_db.is_expired is True:
+            raise self.refresh_token_exception
+
+        user = await self.user_repository.get_or_none(
+            session=session, id=refresh_token_db.user_id
+        )
+
+        if user is None:
+            raise self.refresh_token_exception
+
+        access_token_expires = timedelta(
+            minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
+        )
+
+        access_token_data = {"sub": str(user.id), "type": "access"}
+        access_token = self._create_token(access_token_data, access_token_expires)
+
+        access_token_db = Token(
+            token=access_token,
+            token_type=TokenType.ACCESS,
+            expires_at=datetime.now(UTC) + access_token_expires,
+            user_id=user.id,
+        )
+
+        return await self.token_repository.create(session=session, item=access_token_db)
+
+    async def clean_expired_tokens(
+        self,
+        session: AsyncSession,
+    ) -> None:
+        """Clean expired tokens."""
+        await self.token_repository.delete_expired(session=session)
