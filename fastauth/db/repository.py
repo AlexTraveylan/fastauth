@@ -40,9 +40,7 @@ class Repository[T]:
 
     async def get_or_none(self, session: AsyncSession, **kwargs) -> T | None:
         """Get an item from the database or return None if it doesn't exist."""
-        filter_kwargs = [
-            getattr(self.__model__, key) == value for key, value in kwargs.items()
-        ]
+        filter_kwargs = [getattr(self.__model__, key) == value for key, value in kwargs.items()]
 
         statement = select(self.__model__).where(*filter_kwargs)
 

@@ -31,8 +31,8 @@ jobs:
       - name: Run Ruff linter
         run: uv run ruff check .
 
-      - name: Run Mypy type checking
-        run: uv run mypy .
+      - name: Run ty type checking
+        run: uv run ty check .
 
       - name: Run Pytest
         run: uv run pytest
@@ -72,10 +72,8 @@ jobs:
             VERSION_TYPE="patch"
           fi
 
-          # Run version bump script
-          source .venv/bin/activate
-          python scripts/bump_version.py $VERSION_TYPE
-          uv sync
+          # Run version bump
+          uv version --bump $VERSION_TYPE
 
           # Read the new version
           NEW_VERSION=$(grep "version =" pyproject.toml | cut -d '"' -f 2)

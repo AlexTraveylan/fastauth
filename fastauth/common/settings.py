@@ -12,9 +12,7 @@ class Settings(BaseSettings):
     necessary for the application to function.
     """
 
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", case_sensitive=False
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False)
 
     # Application parameters
     APP_NAME: str = "FastAuth"

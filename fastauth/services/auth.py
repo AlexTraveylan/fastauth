@@ -93,7 +93,7 @@ class AuthService:
         expire = datetime.now(UTC) + expires_delta
         to_encode.update({"exp": expire})
 
-        return jwt.encode(  # type: ignore
+        return jwt.encode(
             to_encode,
             settings.JWT_SECRET_KEY,
             algorithm=settings.JWT_ALGORITHM,
@@ -105,9 +105,10 @@ class AuthService:
         user: User,
     ) -> tuple[str, str]:
         """Create a new JWT token for the given user."""
-        access_token_expires = timedelta(
-            minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
-        )
+        if user.id is None:
+            raise ValueError
+
+        access_token_expires = timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token_data = {"sub": str(user.id), "type": "access"}
         access_token = self._create_token(access_token_data, access_token_expires)
 
@@ -230,16 +231,15 @@ class AuthService:
         if refresh_token_db is None or refresh_token_db.is_expired is True:
             raise self.refresh_token_exception
 
-        user = await self.user_repository.get_or_none(
-            session=session, id=refresh_token_db.user_id
-        )
+        user = await self.user_repository.get_or_none(session=session, id=refresh_token_db.user_id)
 
         if user is None:
             raise self.refresh_token_exception
 
-        access_token_expires = timedelta(
-            minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
-        )
+        if user.id is None:
+            raise ValueError
+
+        access_token_expires = timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
 
         access_token_data = {"sub": str(user.id), "type": "access"}
         access_token = self._create_token(access_token_data, access_token_expires)

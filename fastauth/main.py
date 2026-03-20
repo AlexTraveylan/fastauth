@@ -20,13 +20,13 @@ app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
 
 # Necessary for OAuth2
 app.add_middleware(
-    SessionMiddleware,
+    SessionMiddleware,  # ty: ignore[invalid-argument-type]
     secret_key=settings.JWT_SECRET_KEY,
 )
 
 # Configure CORS
 app.add_middleware(
-    CORSMiddleware,
+    CORSMiddleware,  # ty: ignore[invalid-argument-type]
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
