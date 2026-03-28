@@ -1,5 +1,3 @@
-"""Configuration de l'application FastAuth."""
-
 from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -27,6 +25,10 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # Rate limiting parameters
+    RATE_LIMIT_LOGIN: str = "5/minute"
+    RATE_LIMIT_REGISTER: str = "3/minute"
 
     # Google OAuth parameters
     GOOGLE_CLIENT_ID: Optional[str] = None

@@ -5,8 +5,6 @@ from sqlmodel import Column, DateTime, Field, SQLModel
 
 
 class TokenType(str, Enum):
-    """Token type."""
-
     ACCESS = "access"
     REFRESH = "refresh"
 
@@ -35,5 +33,5 @@ class Token(SQLModel, table=True):
 
     @property
     def is_expired(self) -> bool:
-        """Check if the token is expired."""
-        return self.expires_at.astimezone(UTC) < datetime.now(UTC)
+        expires = self.expires_at if self.expires_at.tzinfo else self.expires_at.replace(tzinfo=UTC)
+        return expires < datetime.now(UTC)

@@ -1,11 +1,13 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from fastauth.common.rate_limit import limiter
+from fastauth.common.settings import settings
 from fastauth.db import TokenRepository, UserRepository, get_async_session
-from fastauth.models.schemas import Token, UserLogin, UserRegister, UserResponse
+from fastauth.models.schemas import MessageResponse, Token, UserLogin, UserRegister, UserResponse
 from fastauth.models.user import User
 from fastauth.services import auth
 
@@ -32,21 +34,23 @@ async def get_current_user(
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
 )
+@limiter.limit(settings.RATE_LIMIT_REGISTER)
 async def register(
+    request: Request,
     user_data: UserRegister,
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> User:
-    """Register a new user."""
     user = await auth_service.create_user(session=session, user_create=user_data)
     return user
 
 
 @router.post("/login", response_model=Token)
+@limiter.limit(settings.RATE_LIMIT_LOGIN)
 async def login(
+    request: Request,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> Token:
-    """Authenticate and login a user."""
     user_login = UserLogin(
         username=form_data.username,
         password=form_data.password,
@@ -78,22 +82,30 @@ async def refresh(
     refresh_token: Annotated[str, Depends(oauth2_scheme)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> Token:
-    """Refresh a token."""
-    access_token = await auth_service.refresh_token(
+    access_token, new_refresh_token = await auth_service.refresh_token(
         session=session,
         refresh_token=refresh_token,
     )
 
     return Token(
-        access_token=access_token.token,
-        refresh_token=refresh_token,
+        access_token=access_token,
+        refresh_token=new_refresh_token,
         token_type="bearer",
     )
 
 
+@router.post("/logout", response_model=MessageResponse)
+async def logout(
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> MessageResponse:
+    await auth_service.revoke_tokens_for_user(session=session, user_id=current_user.id)  # type: ignore
+    return MessageResponse(message="Successfully logged out")
+
+
 @router.get("/clean")
 async def clean(
+    _current_user: Annotated[User, Depends(get_current_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> None:
-    """Clean expired tokens."""
     await auth_service.clean_expired_tokens(session=session)

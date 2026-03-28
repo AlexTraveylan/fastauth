@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from sqlmodel import delete, select
+from sqlmodel import delete, select, update
 
 from fastauth.models import Token, User
 
@@ -20,14 +20,12 @@ class Repository[T]:
 
     @staticmethod
     async def create(session: AsyncSession, item: T) -> T:
-        """Create an item in the database."""
         session.add(item)
         await session.flush()
 
         return item
 
     async def update(self, session: AsyncSession, id_: int, **kwargs) -> T:
-        """Update an item in the database."""
         bd_item = await session.get_one(self.__model__, id_)
 
         for key, value in kwargs.items():
@@ -39,7 +37,6 @@ class Repository[T]:
         return bd_item
 
     async def get_or_none(self, session: AsyncSession, **kwargs) -> T | None:
-        """Get an item from the database or return None if it doesn't exist."""
         filter_kwargs = [getattr(self.__model__, key) == value for key, value in kwargs.items()]
 
         statement = select(self.__model__).where(*filter_kwargs)
@@ -49,12 +46,10 @@ class Repository[T]:
         return response.scalars().first()
 
     async def get_all(self, session: AsyncSession) -> Sequence[T]:
-        """Get all items from the database."""
         response = await session.execute(select(self.__model__))
         return response.scalars().all()
 
     async def delete(self, session: AsyncSession, id_: int) -> bool:
-        """Delete an item from the database."""
         try:
             item = await session.get_one(self.__model__, id_)
         except NoResultFound:
@@ -66,17 +61,20 @@ class Repository[T]:
 
 
 class UserRepository(Repository[User]):
-    """Repository for user model."""
-
     __model__ = User
 
 
 class TokenRepository(Repository[Token]):
-    """Repository for token model."""
-
     __model__ = Token
 
     async def delete_expired(self, session: AsyncSession) -> None:
-        """Delete expired tokens."""
         statement = delete(Token).where(Token.expires_at < datetime.now(UTC))  # type: ignore
+        await session.execute(statement)
+
+    async def revoke_all_for_user(self, session: AsyncSession, user_id: int) -> None:
+        statement = (
+            update(Token)
+            .where(Token.user_id == user_id, Token.revoked == False)  # type: ignore[arg-type] # noqa: E712
+            .values(revoked=True)
+        )
         await session.execute(statement)

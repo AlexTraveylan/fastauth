@@ -15,8 +15,6 @@ from fastauth.models.user import User
 
 
 class AuthService:
-    """Service for authentication and authorization."""
-
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     auth_fail_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -41,11 +39,9 @@ class AuthService:
         self.token_repository = token_repository
 
     def _verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        """Verify a plain password against a hashed password."""
         return cast(bool, self.pwd_context.verify(plain_password, hashed_password))
 
     def _get_password_hash(self, password: str) -> str:
-        """Hash a password for secure storage."""
         return cast(str, self.pwd_context.hash(password))
 
     async def create_user(
@@ -53,7 +49,6 @@ class AuthService:
         session: AsyncSession,
         user_create: UserRegister,
     ) -> User:
-        """Create a new user with the given credentials."""
         hashed_password = self._get_password_hash(user_create.password)
 
         user = User(
@@ -69,7 +64,6 @@ class AuthService:
         session: AsyncSession,
         user_login: UserLogin,
     ) -> User:
-        """Authenticate a user with their credentials and return the user object."""
         user = await self.user_repository.get_or_none(
             session=session,
             username=user_login.username,
@@ -88,10 +82,9 @@ class AuthService:
         data: dict[str, Any],
         expires_delta: timedelta,
     ) -> str:
-        """Create a new JWT token with the given data and expiration time."""
         to_encode = data.copy()
         expire = datetime.now(UTC) + expires_delta
-        to_encode.update({"exp": expire})
+        to_encode.update({"exp": expire, "jti": uuid.uuid4().hex})
 
         return jwt.encode(
             to_encode,
@@ -104,7 +97,6 @@ class AuthService:
         session: AsyncSession,
         user: User,
     ) -> tuple[str, str]:
-        """Create a new JWT token for the given user."""
         if user.id is None:
             raise ValueError
 
@@ -140,7 +132,6 @@ class AuthService:
         session: AsyncSession,
         token: str,
     ) -> User:
-        """Get the current user from the token."""
         try:
             payload = jwt.decode(
                 token,
@@ -160,7 +151,7 @@ class AuthService:
                 user_id=user_id,
             )
 
-            if token_db is None or token_db.is_expired is True:
+            if token_db is None or token_db.is_expired is True or token_db.revoked:
                 raise self.credentials_exception
 
             user = await self.user_repository.get_or_none(session=session, id=user_id)
@@ -181,7 +172,6 @@ class AuthService:
         email: str,
         username: str,
     ) -> User:
-        """Create or update an authenticated user via OAuth."""
         user = await self.user_repository.get_or_none(
             session=session,
             oauth_provider=provider,
@@ -216,46 +206,41 @@ class AuthService:
 
         return await self.user_repository.create(session=session, item=user)
 
+    async def revoke_tokens_for_user(
+        self,
+        session: AsyncSession,
+        user_id: int,
+    ) -> None:
+        await self.token_repository.revoke_all_for_user(session=session, user_id=user_id)
+
     async def refresh_token(
         self,
         session: AsyncSession,
         refresh_token: str,
-    ) -> Token:
-        """Refresh a token."""
+    ) -> tuple[str, str]:
         refresh_token_db = await self.token_repository.get_or_none(
             session=session,
             token=refresh_token,
             token_type=TokenType.REFRESH,
         )
 
-        if refresh_token_db is None or refresh_token_db.is_expired is True:
+        if refresh_token_db is None or refresh_token_db.is_expired is True or refresh_token_db.revoked:
             raise self.refresh_token_exception
+
+        if refresh_token_db.id is None:
+            raise ValueError
 
         user = await self.user_repository.get_or_none(session=session, id=refresh_token_db.user_id)
 
         if user is None:
             raise self.refresh_token_exception
 
-        if user.id is None:
-            raise ValueError
+        await self.token_repository.update(session, refresh_token_db.id, revoked=True)
 
-        access_token_expires = timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
-
-        access_token_data = {"sub": str(user.id), "type": "access"}
-        access_token = self._create_token(access_token_data, access_token_expires)
-
-        access_token_db = Token(
-            token=access_token,
-            token_type=TokenType.ACCESS,
-            expires_at=datetime.now(UTC) + access_token_expires,
-            user_id=user.id,
-        )
-
-        return await self.token_repository.create(session=session, item=access_token_db)
+        return await self.create_token_for_user(session=session, user=user)
 
     async def clean_expired_tokens(
         self,
         session: AsyncSession,
     ) -> None:
-        """Clean expired tokens."""
         await self.token_repository.delete_expired(session=session)

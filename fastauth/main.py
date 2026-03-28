@@ -2,8 +2,14 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.requests import Request
 
+from fastauth.common.exceptions import DatabaseException
+from fastauth.common.rate_limit import limiter
 from fastauth.common.settings import settings
 from fastauth.db import get_async_engine, init_db
 from fastauth.routers import auth_router, google_auth_router
@@ -17,6 +23,18 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
+
+
+# Rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore
+
+
+@app.exception_handler(DatabaseException)
+async def database_exception_handler(_request: Request, exc: DatabaseException) -> JSONResponse:
+    """Handle database exceptions."""
+    return JSONResponse(status_code=409, content={"detail": str(exc)})
+
 
 # Necessary for OAuth2
 app.add_middleware(
