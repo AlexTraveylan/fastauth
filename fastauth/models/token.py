@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 from enum import Enum
+from uuid import UUID
 
 from sqlmodel import Column, DateTime, Field, SQLModel
 
@@ -10,12 +11,6 @@ class TokenType(str, Enum):
 
 
 class Token(SQLModel, table=True):
-    """Data model for authentication tokens.
-
-    This model represents the JWT tokens stored for session management
-    and the refresh token mechanism.
-    """
-
     __tablename__ = "tokens"
 
     id: int | None = Field(default=None, primary_key=True)
@@ -29,7 +24,7 @@ class Token(SQLModel, table=True):
     )
 
     # Relation with the user
-    user_id: int = Field(foreign_key="users.id", ondelete="CASCADE")
+    user_id: UUID = Field(foreign_key="users.id", ondelete="CASCADE")
 
     @property
     def is_expired(self) -> bool:

@@ -46,8 +46,9 @@ class TestRegister:
         # Then
         assert response.status_code == 201
         data = response.json()
-        assert data["email"] == payload["email"]
-        assert data["username"] == payload["username"]
+        assert "access_token" in data
+        assert "refresh_token" in data
+        assert data["token_type"] == "bearer"
 
     async def test_register_duplicate_email(self, client: AsyncClient) -> None:
         # Given

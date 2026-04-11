@@ -17,7 +17,6 @@ from fastauth.routers import auth_router, google_auth_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Gestionnaire de cycle de vie de l'application."""
     await init_db(engine=get_async_engine())
     yield
 
@@ -25,14 +24,12 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
 
 
-# Rate limiting
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore
 
 
 @app.exception_handler(DatabaseException)
 async def database_exception_handler(_request: Request, exc: DatabaseException) -> JSONResponse:
-    """Handle database exceptions."""
     return JSONResponse(status_code=409, content={"detail": str(exc)})
 
 
@@ -42,10 +39,11 @@ app.add_middleware(
     secret_key=settings.JWT_SECRET_KEY,
 )
 
-# Configure CORS
+allowed_origins = [origin.strip() for origin in settings.ALLOWED_ORIGINS.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,  # ty: ignore[invalid-argument-type]
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

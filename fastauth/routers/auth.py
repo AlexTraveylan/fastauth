@@ -31,7 +31,7 @@ async def get_current_user(
 
 @router.post(
     "/register",
-    response_model=UserResponse,
+    response_model=Token,
     status_code=status.HTTP_201_CREATED,
 )
 @limiter.limit(settings.RATE_LIMIT_REGISTER)
@@ -39,9 +39,17 @@ async def register(
     request: Request,
     user_data: UserRegister,
     session: Annotated[AsyncSession, Depends(get_async_session)],
-) -> User:
+) -> Token:
     user = await auth_service.create_user(session=session, user_create=user_data)
-    return user
+    access_token, refresh_token = await auth_service.create_token_for_user(
+        session=session,
+        user=user,
+    )
+    return Token(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+    )
 
 
 @router.post("/login", response_model=Token)
@@ -99,7 +107,7 @@ async def logout(
     current_user: Annotated[User, Depends(get_current_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> MessageResponse:
-    await auth_service.revoke_tokens_for_user(session=session, user_id=current_user.id)  # type: ignore
+    await auth_service.revoke_tokens_for_user(session=session, user_id=current_user.id)
     return MessageResponse(message="Successfully logged out")
 
 

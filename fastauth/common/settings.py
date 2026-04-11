@@ -4,12 +4,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Configuration class for the FastAuth application.
-
-    This class uses Pydantic to load and validate the environment variables
-    necessary for the application to function.
-    """
-
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False)
 
     # Application parameters
@@ -18,7 +12,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # Database parameters
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:fastauth@localhost:5432/fastauth"
+    FASTAUTH_POSTGRES_POOLER_CONNECTION_STRING: str = "postgresql+asyncpg://postgres:fastauth@localhost:5432/fastauth"
 
     # JWT parameters
     JWT_SECRET_KEY: str = "super-secret-key-change-in-production"
@@ -29,6 +23,9 @@ class Settings(BaseSettings):
     # Rate limiting parameters
     RATE_LIMIT_LOGIN: str = "5/minute"
     RATE_LIMIT_REGISTER: str = "3/minute"
+
+    # CORS
+    ALLOWED_ORIGINS: str = "*"
 
     # Google OAuth parameters
     GOOGLE_CLIENT_ID: Optional[str] = None

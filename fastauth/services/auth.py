@@ -1,6 +1,7 @@
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any, cast
+from uuid import UUID
 
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
@@ -97,9 +98,6 @@ class AuthService:
         session: AsyncSession,
         user: User,
     ) -> tuple[str, str]:
-        if user.id is None:
-            raise ValueError
-
         access_token_expires = timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token_data = {"sub": str(user.id), "type": "access"}
         access_token = self._create_token(access_token_data, access_token_expires)
@@ -139,11 +137,13 @@ class AuthService:
                 algorithms=[settings.JWT_ALGORITHM],
             )
 
-            user_id: int = int(payload.get("sub"))
+            sub = payload.get("sub")
             token_type: str = payload.get("type")
 
-            if user_id is None or token_type != "access":
+            if sub is None or token_type != "access":
                 raise self.credentials_exception
+
+            user_id = UUID(sub)
 
             token_db = await self.token_repository.get_or_none(
                 session=session,
@@ -184,7 +184,7 @@ class AuthService:
                 email=email,
             )
 
-        if user is not None and user.id is not None:
+        if user is not None:
             await self.user_repository.update(
                 session=session,
                 id_=user.id,
@@ -209,7 +209,7 @@ class AuthService:
     async def revoke_tokens_for_user(
         self,
         session: AsyncSession,
-        user_id: int,
+        user_id: UUID,
     ) -> None:
         await self.token_repository.revoke_all_for_user(session=session, user_id=user_id)
 

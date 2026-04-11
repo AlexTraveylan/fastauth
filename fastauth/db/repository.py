@@ -1,9 +1,11 @@
 from collections.abc import Sequence
 from datetime import UTC, datetime
+from typing import Any
+from uuid import UUID
 
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from sqlmodel import delete, select, update
+from sqlmodel import col, delete, select, update
 
 from fastauth.models import Token, User
 
@@ -25,7 +27,7 @@ class Repository[T]:
 
         return item
 
-    async def update(self, session: AsyncSession, id_: int, **kwargs) -> T:
+    async def update(self, session: AsyncSession, id_: Any, **kwargs) -> T:
         bd_item = await session.get_one(self.__model__, id_)
 
         for key, value in kwargs.items():
@@ -49,7 +51,7 @@ class Repository[T]:
         response = await session.execute(select(self.__model__))
         return response.scalars().all()
 
-    async def delete(self, session: AsyncSession, id_: int) -> bool:
+    async def delete(self, session: AsyncSession, id_: Any) -> bool:
         try:
             item = await session.get_one(self.__model__, id_)
         except NoResultFound:
@@ -68,13 +70,11 @@ class TokenRepository(Repository[Token]):
     __model__ = Token
 
     async def delete_expired(self, session: AsyncSession) -> None:
-        statement = delete(Token).where(Token.expires_at < datetime.now(UTC))  # type: ignore
+        statement = delete(Token).where(col(Token.expires_at) < datetime.now(UTC))
         await session.execute(statement)
 
-    async def revoke_all_for_user(self, session: AsyncSession, user_id: int) -> None:
+    async def revoke_all_for_user(self, session: AsyncSession, user_id: UUID) -> None:
         statement = (
-            update(Token)
-            .where(Token.user_id == user_id, Token.revoked == False)  # type: ignore[arg-type] # noqa: E712
-            .values(revoked=True)
+            update(Token).where(col(Token.user_id) == user_id, col(Token.revoked).is_(False)).values(revoked=True)
         )
         await session.execute(statement)

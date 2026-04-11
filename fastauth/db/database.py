@@ -9,17 +9,30 @@ from fastauth.common.exceptions import DatabaseException
 from fastauth.common.settings import settings
 
 
+def _build_async_uri(raw_uri: str) -> str:
+    if raw_uri.startswith("postgresql+asyncpg://"):
+        return raw_uri
+
+    if raw_uri.startswith("postgresql://"):
+        return raw_uri.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+    return raw_uri
+
+
 def get_async_engine() -> AsyncEngine:
-    """Get the async engine for the database."""
     return create_async_engine(
-        settings.DATABASE_URL,
+        _build_async_uri(settings.FASTAUTH_POSTGRES_POOLER_CONNECTION_STRING),
         echo=settings.DEBUG,
         future=True,
+        connect_args={
+            "ssl": "require",
+            "statement_cache_size": 0,
+            "prepared_statement_cache_size": 0,
+        },
     )
 
 
 async def init_db(engine: Annotated[AsyncEngine, Depends(get_async_engine)]) -> None:
-    """Initialize the database with the defined models."""
     async with engine.begin() as async_conn:
         await async_conn.run_sync(SQLModel.metadata.create_all)
 
@@ -27,7 +40,6 @@ async def init_db(engine: Annotated[AsyncEngine, Depends(get_async_engine)]) -> 
 async def get_async_session(
     engine: Annotated[AsyncEngine, Depends(get_async_engine)],
 ) -> AsyncGenerator[AsyncSession, None]:
-    """Yield an async session."""
     async_session = async_sessionmaker(
         bind=engine,
         autoflush=False,

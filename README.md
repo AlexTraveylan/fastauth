@@ -2,6 +2,11 @@
 
 ## Database
 
+### Env
+
+FASTAUTH_POSTGRES_POOLER_CONNECTION_STRING
+postgresql://postgres.<project_id>:<password>@aws-0-eu-west-1.pooler.supabase.com:6543/postgres
+
 ### Connection
 
 ```bash
@@ -24,5 +29,3 @@ SELECT * FROM tokens;
 DELETE FROM tokens;
 DELETE FROM users;
 ```
-
-
