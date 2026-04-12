@@ -1,5 +1,6 @@
 import asyncio
 from logging.config import fileConfig
+from uuid import uuid4
 
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
@@ -55,6 +56,7 @@ async def run_async_migrations() -> None:
         connect_args={
             "ssl": "require",
             "statement_cache_size": 0,
+            "prepared_statement_name_func": lambda: f"__asyncpg_{uuid4()}__",
         },
     )
 
