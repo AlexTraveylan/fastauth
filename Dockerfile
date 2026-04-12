@@ -13,7 +13,6 @@ RUN uv sync --frozen --no-install-project
 
 # Copy source code
 COPY fastauth ./fastauth
-COPY main.py .
 
 # Run the application
 CMD uv run fastapi run fastauth/main.py --port ${PORT:-8000} --host 0.0.0.0
