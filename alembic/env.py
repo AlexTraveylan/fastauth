@@ -22,9 +22,9 @@ target_metadata = SQLModel.metadata
 
 config.set_main_option(
     "sqlalchemy.url",
-    settings.FASTAUTH_POSTGRES_POOLER_CONNECTION_STRING.replace(
-        "postgresql://", "postgresql+asyncpg://", 1
-    ).replace("postgresql+asyncpg+asyncpg://", "postgresql+asyncpg://", 1),
+    settings.FASTAUTH_POSTGRES_POOLER_CONNECTION_STRING.replace("postgresql://", "postgresql+asyncpg://", 1).replace(
+        "postgresql+asyncpg+asyncpg://", "postgresql+asyncpg://", 1
+    ),
 )
 
 
