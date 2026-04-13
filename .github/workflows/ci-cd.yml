@@ -1,84 +1,38 @@
 name: FastAuth CI/CD
 on:
-  push:
-    branches:
-      - "*"
-  pull_request:
-    branches:
-      - main
+    push:
+        branches:
+            - "*"
+    pull_request:
+        branches:
+            - main
 
 permissions:
-  contents: write
+    contents: write
 
 jobs:
-  quality:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    quality:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
+            - name: Set up Python 3.13
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.13"
 
-      - name: Install uv
-        run: pip install uv
+            - name: Install uv
+              run: pip install uv
 
-      - name: Install dependencies
-        run: uv sync
+            - name: Install dependencies
+              run: uv sync
 
-      - name: Run Ruff linter
-        run: uv run ruff check .
+            - name: Run Ruff linter
+              run: uv run ruff check .
 
-      - name: Run ty type checking
-        run: uv run ty check .
+            - name: Run ty type checking
+              run: uv run ty check .
 
-      - name: Run Pytest
-        run: uv run pytest
-
-  bump-version:
-    needs: quality
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Install uv
-        run: pip install uv
-
-      - name: Install dependencies
-        run: uv sync
-
-      - name: Bump version
-        run: |
-          # Configure git
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          # Determine version update type
-          if echo "${{ github.event.head_commit.message }}" | grep -q "#major"; then
-            VERSION_TYPE="major"
-          elif echo "${{ github.event.head_commit.message }}" | grep -q "#minor"; then
-            VERSION_TYPE="minor"
-          else
-            VERSION_TYPE="patch"
-          fi
-
-          # Run version bump
-          uv version --bump $VERSION_TYPE
-
-          # Read the new version
-          NEW_VERSION=$(grep "version =" pyproject.toml | cut -d '"' -f 2)
-
-          # Commit and push version change
-          git add .  # Add all changed files
-          git commit -m "[BOT] Version bump to: $NEW_VERSION"
-          git push origin HEAD:$GITHUB_REF
+            - name: Run Pytest
+              run: uv run pytest

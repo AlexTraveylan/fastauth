@@ -1,3 +1,5 @@
+fail_fast: false
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -6,33 +8,37 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
+      - id: check-merge-conflict
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.10
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.37.1
+    hooks:
+      - id: check-github-workflows
 
   - repo: local
     hooks:
-      - id: ruff check
-        name: Ruff check
-        entry: uv run ruff check . --fix
-        language: system
-        types: [python]
-        pass_filenames: false
-
-      - id: ruff format
-        name: Ruff format
-        entry: uv run ruff format .
-        language: system
-        types: [python]
-        pass_filenames: false
-
       - id: ty
-        name: Ty
-        entry: uv run ty check .
+        name: ty check
+        entry: uvx ty check . --ignore unresolved-import
         language: system
-        types: [python]
         pass_filenames: false
+        always_run: true
 
       - id: pytest
         name: Pytest
         entry: uv run pytest
         language: system
-        types: [python]
         pass_filenames: false
+        always_run: true
