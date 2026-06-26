@@ -35,7 +35,8 @@ class MessageResponse(BaseModel):
 
 class GoogleUserInfo(BaseModel):
     email: EmailStr
-    email_verified: bool
-    name: str
-    family_name: str
     sub: str
+    given_name: str | None = None
+    name: str | None = None
+    family_name: str | None = None
+    email_verified: bool = False
