@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-06-26
+
+### Added
+- Google OAuth2 login flow: `/api/v1/auth/google/login` and `/api/v1/auth/google/callback`. The callback creates or links the user, derives the username from the Google first name (falling back to the email), appends a short random suffix on username collision, and redirects to the frontend with the access and refresh tokens in the URL fragment.
+- `FRONTEND_URL` setting (where the callback redirects the browser back).
+- `given_name` field on the `GoogleUserInfo` schema.
+
+### Changed
+- `GoogleUserInfo` now tolerates missing `name`, `family_name` and `email_verified` (only `email` and `sub` are required).
+
 ## [0.5.0] - 2026-04-11
 
 ### Changed
