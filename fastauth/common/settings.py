@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: Optional[str] = None
     GOOGLE_REDIRECT_URI: Optional[str] = None
 
+    # Frontend
+    FRONTEND_URL: str = "http://localhost:5173"
+
 
 # Global configuration instance
 settings = Settings()

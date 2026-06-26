@@ -1,3 +1,4 @@
+import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any, cast
@@ -164,6 +165,16 @@ class AuthService:
         except JWTError:
             raise self.credentials_exception
 
+    async def _generate_unique_username(
+        self,
+        session: AsyncSession,
+        base: str,
+    ) -> str:
+        existing = await self.user_repository.get_or_none(session=session, username=base)
+        if existing is None:
+            return base
+        return f"{base}-{secrets.token_hex(2)}"
+
     async def create_or_update_oauth2_user(
         self,
         session: AsyncSession,
@@ -193,12 +204,14 @@ class AuthService:
             )
             return user
 
+        unique_username = await self._generate_unique_username(session=session, base=username)
+
         random_password = uuid.uuid4().hex
         hashed_password = self._get_password_hash(random_password)
 
         user = User(
             email=email,
-            username=username,
+            username=unique_username,
             hashed_password=hashed_password,
             oauth_provider=provider,
             oauth_id=provider_id,

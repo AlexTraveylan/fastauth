@@ -1,11 +1,13 @@
 """Routes pour l'authentification Google OAuth."""
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from urllib.parse import urlencode
+
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import RedirectResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from fastauth.common.settings import settings
 from fastauth.db import TokenRepository, UserRepository, get_async_session
-from fastauth.models.schemas import Token
 from fastauth.services import auth, oauth2
 
 router = APIRouter(tags=["google_auth"])
@@ -16,21 +18,24 @@ auth_service = auth.AuthService(
 )
 
 
+def _frontend_redirect(fragment: dict[str, str]) -> RedirectResponse:
+    return RedirectResponse(url=f"{settings.FRONTEND_URL}/auth/callback#{urlencode(fragment)}")
+
+
 @router.get("/login")
 async def login_via_google(request: Request):
     """Initialize the Google authentication process."""
-    redirect_uri = await oauth2.oauth.google.authorize_redirect(
+    return await oauth2.oauth.google.authorize_redirect(
         request,
         redirect_uri=settings.GOOGLE_REDIRECT_URI,
     )
-    return redirect_uri
 
 
 @router.get("/callback")
 async def auth_callback_google(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
-) -> Token:
+) -> RedirectResponse:
     """Handle the Google authentication callback."""
     try:
         user_info = await oauth2.get_google_user_info(request)
@@ -40,7 +45,7 @@ async def auth_callback_google(
             provider="google",
             provider_id=user_info.sub,
             email=user_info.email,
-            username=f"{user_info.name}.{user_info.family_name}",
+            username=user_info.given_name or user_info.email,
         )
 
         access_token, refresh_token = await auth_service.create_token_for_user(
@@ -48,14 +53,13 @@ async def auth_callback_google(
             user=user,
         )
 
-        return Token(
-            access_token=access_token,
-            refresh_token=refresh_token,
-            token_type="bearer",
+        return _frontend_redirect(
+            {
+                "access_token": access_token,
+                "refresh_token": refresh_token,
+                "token_type": "bearer",
+            },
         )
 
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Erreur lors de l'authentification Google: {str(e)}",
-        )
+    except Exception as e:  # noqa: BLE001
+        return _frontend_redirect({"error": str(e)})
