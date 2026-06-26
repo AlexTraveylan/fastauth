@@ -1,14 +1,18 @@
 from faker import Faker
+from httpx import AsyncClient
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from fastauth.db import TokenRepository, UserRepository
 from fastauth.models.schemas import GoogleUserInfo
 from fastauth.models.user import User
+from fastauth.routers import google_auth
 from fastauth.services.auth import AuthService
 
 fake = Faker()
 
 auth_service = AuthService(user_repository=UserRepository(), token_repository=TokenRepository())
+
+CALLBACK_URL = "/api/v1/auth/google/callback"
 
 
 class TestGoogleUserInfo:
@@ -116,3 +120,47 @@ class TestCreateOrUpdateOAuth2User:
         assert user.id == existing.id
         assert user.oauth_provider == "google"
         assert user.oauth_id == provider_id
+
+
+class TestGoogleCallback:
+    async def test_redirects_to_frontend_with_tokens(
+        self,
+        client: AsyncClient,
+        monkeypatch,
+    ) -> None:
+        # Given
+        given_name = fake.first_name()
+
+        async def fake_user_info(_request) -> GoogleUserInfo:
+            return GoogleUserInfo(email=fake.email(), sub=fake.uuid4(), given_name=given_name)
+
+        monkeypatch.setattr(google_auth.oauth2, "get_google_user_info", fake_user_info)
+
+        # When
+        response = await client.get(CALLBACK_URL, follow_redirects=False)
+
+        # Then
+        assert response.status_code == 307
+        location = response.headers["location"]
+        assert location.startswith("http://localhost:5173/auth/callback#")
+        assert "access_token=" in location
+        assert "refresh_token=" in location
+
+    async def test_redirects_to_frontend_with_error_on_failure(
+        self,
+        client: AsyncClient,
+        monkeypatch,
+    ) -> None:
+        # Given
+        async def failing_user_info(_request) -> GoogleUserInfo:
+            raise ValueError("boom")
+
+        monkeypatch.setattr(google_auth.oauth2, "get_google_user_info", failing_user_info)
+
+        # When
+        response = await client.get(CALLBACK_URL, follow_redirects=False)
+
+        # Then
+        assert response.status_code == 307
+        location = response.headers["location"]
+        assert location.startswith("http://localhost:5173/auth/callback#error=")
