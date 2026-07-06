@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `get_async_session` no longer converts `HTTPException`s raised by services into `DatabaseException` (409). Invalid or expired tokens now return 401 as intended, so clients can distinguish auth failures from database errors. Only `SQLAlchemyError`s are wrapped into a 409 now. The test suite exercises the real dependency through the app (new `tests/test_database.py`); the previous conftest override had masked the divergence.
+
 ## [0.6.0] - 2026-06-26
 
 ### Added

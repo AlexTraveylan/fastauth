@@ -35,14 +35,14 @@ async def database_exception_handler(_request: Request, exc: DatabaseException) 
 
 # Necessary for OAuth2
 app.add_middleware(
-    SessionMiddleware,  # ty: ignore[invalid-argument-type]
+    SessionMiddleware,
     secret_key=settings.JWT_SECRET_KEY,
 )
 
 allowed_origins = [origin.strip() for origin in settings.ALLOWED_ORIGINS.split(",") if origin.strip()]
 
 app.add_middleware(
-    CORSMiddleware,  # ty: ignore[invalid-argument-type]
+    CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],

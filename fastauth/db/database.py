@@ -2,6 +2,7 @@ from typing import Annotated, AsyncGenerator
 from uuid import uuid4
 
 from fastapi import Depends
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlmodel import SQLModel
@@ -50,8 +51,11 @@ async def get_async_session(
         try:
             yield session
             await session.commit()
-        except Exception as e:
+        except SQLAlchemyError as e:
             await session.rollback()
             raise DatabaseException("An error occurred during the session") from e
+        except Exception:
+            await session.rollback()
+            raise
         finally:
             await session.close()
