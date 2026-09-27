@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     # Frontend
     FRONTEND_URL: str = "http://localhost:5173"
 
+    # Sentry
+    SENTRY_DSN: str | None = None
+
 
 # Global configuration instance
 settings = Settings()
