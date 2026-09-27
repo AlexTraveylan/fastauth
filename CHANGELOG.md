@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.7.0] - 2026-09-27
+
+### Added
+
+- `DELETE /api/v1/auth/me` (204): permanently deletes the authenticated user and all their tokens (GDPR erasure). Username and email become available again.
+
+### Changed
+
+- New `DB_SSL` setting (default `true`): set it to `false` to connect to a local Postgres without SSL. Documented in the new `.env.example`.
 
 ### Fixed
 
