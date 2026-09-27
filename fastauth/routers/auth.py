@@ -85,6 +85,14 @@ async def get_current_user_info(
     return current_user
 
 
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_current_user(
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> None:
+    await auth_service.delete_user(session=session, user_id=current_user.id)
+
+
 @router.get("/refresh", response_model=Token)
 async def refresh(
     refresh_token: Annotated[str, Depends(oauth2_scheme)],

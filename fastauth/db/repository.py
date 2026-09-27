@@ -78,3 +78,7 @@ class TokenRepository(Repository[Token]):
             update(Token).where(col(Token.user_id) == user_id, col(Token.revoked).is_(False)).values(revoked=True)
         )
         await session.execute(statement)
+
+    async def delete_all_for_user(self, session: AsyncSession, user_id: UUID) -> None:
+        statement = delete(Token).where(col(Token.user_id) == user_id)
+        await session.execute(statement)

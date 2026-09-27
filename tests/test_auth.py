@@ -213,6 +213,89 @@ class TestMe:
         assert response.status_code == 401
 
 
+class TestDeleteMe:
+    async def test_delete_me_returns_204(self, client: AsyncClient) -> None:
+        # Given
+        user_data = await register_and_login(client)
+
+        # When
+        response = await client.delete(
+            f"{API_PREFIX}/me",
+            headers={"Authorization": f"Bearer {user_data['access_token']}"},
+        )
+
+        # Then
+        assert response.status_code == 204
+
+    async def test_deleted_user_cannot_login(self, client: AsyncClient) -> None:
+        # Given
+        user_data = await register_and_login(client)
+        await client.delete(
+            f"{API_PREFIX}/me",
+            headers={"Authorization": f"Bearer {user_data['access_token']}"},
+        )
+
+        # When
+        response = await client.post(
+            f"{API_PREFIX}/login",
+            data={"username": user_data["username"], "password": user_data["password"]},
+        )
+
+        # Then
+        assert response.status_code == 401
+
+    async def test_deleted_user_tokens_are_invalid(self, client: AsyncClient) -> None:
+        # Given
+        user_data = await register_and_login(client)
+        await client.delete(
+            f"{API_PREFIX}/me",
+            headers={"Authorization": f"Bearer {user_data['access_token']}"},
+        )
+
+        # When
+        me_response = await client.get(
+            f"{API_PREFIX}/me",
+            headers={"Authorization": f"Bearer {user_data['access_token']}"},
+        )
+        refresh_response = await client.get(
+            f"{API_PREFIX}/refresh",
+            headers={"Authorization": f"Bearer {user_data['refresh_token']}"},
+        )
+
+        # Then
+        assert me_response.status_code == 401
+        assert refresh_response.status_code == 401
+
+    async def test_deleted_user_email_and_username_can_register_again(self, client: AsyncClient) -> None:
+        # Given
+        user_data = await register_and_login(client)
+        await client.delete(
+            f"{API_PREFIX}/me",
+            headers={"Authorization": f"Bearer {user_data['access_token']}"},
+        )
+
+        # When
+        response = await client.post(
+            f"{API_PREFIX}/register",
+            json={
+                "email": user_data["email"],
+                "username": user_data["username"],
+                "password": fake.password(length=12),
+            },
+        )
+
+        # Then
+        assert response.status_code == 201
+
+    async def test_delete_me_without_token_returns_401(self, client: AsyncClient) -> None:
+        # Given
+        # When
+        response = await client.delete(f"{API_PREFIX}/me")
+
+        # Then
+        assert response.status_code == 401
+
+
 class TestRefresh:
     async def test_refresh_success_with_rotation(self, client: AsyncClient) -> None:
         # Given

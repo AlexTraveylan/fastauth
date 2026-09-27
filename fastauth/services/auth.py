@@ -226,6 +226,14 @@ class AuthService:
     ) -> None:
         await self.token_repository.revoke_all_for_user(session=session, user_id=user_id)
 
+    async def delete_user(
+        self,
+        session: AsyncSession,
+        user_id: UUID,
+    ) -> None:
+        await self.token_repository.delete_all_for_user(session=session, user_id=user_id)
+        await self.user_repository.delete(session=session, id_=user_id)
+
     async def refresh_token(
         self,
         session: AsyncSession,
