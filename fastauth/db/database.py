@@ -21,17 +21,13 @@ def _build_async_uri(raw_uri: str) -> str:
     return raw_uri
 
 
-def _resolve_ssl(db_ssl: bool) -> str | bool:
-    return "require" if db_ssl else False
-
-
 def get_async_engine() -> AsyncEngine:
     return create_async_engine(
         _build_async_uri(settings.FASTAUTH_POSTGRES_POOLER_CONNECTION_STRING),
         echo=settings.DEBUG,
         future=True,
         connect_args={
-            "ssl": _resolve_ssl(settings.DB_SSL),
+            "ssl": "require",
             "statement_cache_size": 0,
             "prepared_statement_name_func": lambda: f"__asyncpg_{uuid4()}__",
         },
