@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     # Database parameters
     FASTAUTH_POSTGRES_POOLER_CONNECTION_STRING: str = "postgresql+asyncpg://postgres:fastauth@localhost:5432/fastauth"
+    DB_SSL: bool = True
 
     # JWT parameters
     JWT_SECRET_KEY: str = "super-secret-key-change-in-production"

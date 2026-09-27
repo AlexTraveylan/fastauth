@@ -7,10 +7,19 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from fastauth.common.exceptions import DatabaseException
-from fastauth.db.database import get_async_engine, get_async_session
+from fastauth.db.database import _resolve_ssl, get_async_engine, get_async_session
 from fastauth.main import app
 
 API_PREFIX = "/api/v1/auth"
+
+
+@pytest.mark.parametrize(("db_ssl", "expected"), [(True, "require"), (False, False)])
+def test_resolve_ssl(db_ssl: bool, expected: str | bool) -> None:
+    # Given / When
+    result = _resolve_ssl(db_ssl)
+
+    # Then
+    assert result == expected
 
 
 @pytest.fixture
