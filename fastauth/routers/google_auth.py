@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from fastauth.common.rate_limit import google_limit, limiter
 from fastauth.common.settings import settings
 from fastauth.db import TokenRepository, UserRepository, get_async_session
 from fastauth.services import auth, oauth2
@@ -23,6 +24,7 @@ def _frontend_redirect(fragment: dict[str, str]) -> RedirectResponse:
 
 
 @router.get("/login")
+@limiter.limit(google_limit)
 async def login_via_google(request: Request):
     """Initialize the Google authentication process."""
     return await oauth2.oauth.google.authorize_redirect(
@@ -32,6 +34,7 @@ async def login_via_google(request: Request):
 
 
 @router.get("/callback")
+@limiter.limit(google_limit)
 async def auth_callback_google(
     request: Request,
     session: AsyncSession = Depends(get_async_session),

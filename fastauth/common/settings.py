@@ -21,8 +21,12 @@ class Settings(BaseSettings):
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     # Rate limiting parameters
-    RATE_LIMIT_LOGIN: str = "5/minute"
-    RATE_LIMIT_REGISTER: str = "3/minute"
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_STORAGE_URI: str = "memory://"
+    RATE_LIMIT_LOGIN: str = "10/minute;100/hour"
+    RATE_LIMIT_REGISTER: str = "5/minute;30/hour"
+    RATE_LIMIT_REFRESH: str = "30/minute;300/hour"
+    RATE_LIMIT_GOOGLE: str = "20/minute;200/hour"
 
     # CORS
     ALLOWED_ORIGINS: str = "*"

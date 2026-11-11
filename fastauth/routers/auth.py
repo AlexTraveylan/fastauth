@@ -4,8 +4,7 @@ from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from fastauth.common.rate_limit import limiter
-from fastauth.common.settings import settings
+from fastauth.common.rate_limit import limiter, login_limit, refresh_limit, register_limit
 from fastauth.db import TokenRepository, UserRepository, get_async_session
 from fastauth.models.schemas import MessageResponse, Token, UserLogin, UserRegister, UserResponse
 from fastauth.models.user import User
@@ -34,7 +33,7 @@ async def get_current_user(
     response_model=Token,
     status_code=status.HTTP_201_CREATED,
 )
-@limiter.limit(settings.RATE_LIMIT_REGISTER)
+@limiter.limit(register_limit)
 async def register(
     request: Request,
     user_data: UserRegister,
@@ -53,7 +52,7 @@ async def register(
 
 
 @router.post("/login", response_model=Token)
-@limiter.limit(settings.RATE_LIMIT_LOGIN)
+@limiter.limit(login_limit)
 async def login(
     request: Request,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
@@ -94,7 +93,9 @@ async def delete_current_user(
 
 
 @router.get("/refresh", response_model=Token)
+@limiter.limit(refresh_limit)
 async def refresh(
+    request: Request,
     refresh_token: Annotated[str, Depends(oauth2_scheme)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> Token:

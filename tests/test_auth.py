@@ -1,5 +1,8 @@
+import pytest
 from faker import Faker
 from httpx import AsyncClient
+
+from fastauth.common.settings import settings
 
 fake = Faker()
 
@@ -429,8 +432,9 @@ class TestClean:
 
 
 class TestRateLimit:
-    async def test_login_rate_limit(self, client: AsyncClient) -> None:
+    async def test_login_rate_limit(self, client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
         # Given
+        monkeypatch.setattr(settings, "RATE_LIMIT_LOGIN", "5/minute")
         username = fake.user_name()
         password = fake.password(length=12)
         await client.post(
@@ -450,8 +454,10 @@ class TestRateLimit:
         # Then
         assert responses[-1].status_code == 429
 
-    async def test_register_rate_limit(self, client: AsyncClient) -> None:
+    async def test_register_rate_limit(self, client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
         # Given
+        monkeypatch.setattr(settings, "RATE_LIMIT_REGISTER", "3/minute")
+
         # When
         responses = []
         for _ in range(4):
@@ -466,4 +472,16 @@ class TestRateLimit:
             responses.append(response)
 
         # Then
+        assert responses[-1].status_code == 429
+
+    async def test_refresh_rate_limit(self, client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
+        # Given
+        monkeypatch.setattr(settings, "RATE_LIMIT_REFRESH", "2/minute")
+        headers = {"Authorization": f"Bearer {fake.sha256()}"}
+
+        # When
+        responses = [await client.get(f"{API_PREFIX}/refresh", headers=headers) for _ in range(3)]
+
+        # Then
+        assert responses[0].status_code != 429
         assert responses[-1].status_code == 429

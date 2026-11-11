@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-11-11
+- Rate limiting fully configurable by env (`RATE_LIMIT_ENABLED`, `RATE_LIMIT_STORAGE_URI`, `RATE_LIMIT_LOGIN`, `RATE_LIMIT_REGISTER`, `RATE_LIMIT_REFRESH`, `RATE_LIMIT_GOOGLE`), read at request time; see `.env.example`.
+- New limits on `GET /auth/refresh` and the Google OAuth routes.
+- Multi-rule limits (`10/minute;100/hour`); defaults relaxed (login 10/min, register 5/min) to tolerate users sharing an IP.
+- Document `FORWARDED_ALLOW_IPS` for deployments behind a reverse proxy.
+
 ## [0.8.0] - 2026-09-27
 
 ### Added
